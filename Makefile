@@ -8,11 +8,11 @@
 #
 # HW should be set to the assignment number (i.e. 1, 2, 3, etc.)
 #
-# FOPTION can be set to blank (nothing) or to any thing starting with an 
+# FOPTION can be set to blank (nothing) or to any thing starting with an
 # underscore (_).  This is the suffix of your file name.
 #
 # With these three options above set your filename for your homework
-# assignment will look like:  bierman_robert_HW1_main.c 
+# assignment will look like:  bierman_robert_HW1_main.c
 #
 # RUNOPTIONS can be set to default values you want passed into the program
 # this can also be overridden on the command line
@@ -33,8 +33,8 @@
 # will delete the executable and any object files in your directory.
 #
 
-FIRSTNAME=
-LASTNAME=
+FIRSTNAME=Mos
+LASTNAME=Kullathon
 
 ROOTNAME=$(LASTNAME)_$(FIRSTNAME)_HW
 HW=3
@@ -43,11 +43,11 @@ RUNOPTIONS="Prompt> "
 CC=gcc
 CFLAGS= -g -I.
 LIBS =-l pthread
-DEPS = 
+DEPS =
 OBJ = $(ROOTNAME)$(HW)$(FOPTION).o
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) 
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(ROOTNAME)$(HW)$(FOPTION): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
