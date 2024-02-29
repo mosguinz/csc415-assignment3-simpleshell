@@ -23,7 +23,7 @@ char **getTokens();
 
 int main(int argc, char const *argv[])
 {
-    const char *prompt = argv[1];
+    const char *prompt = argc > 1 ? argv[1] : "$ ";
 
     while (1)
     {
