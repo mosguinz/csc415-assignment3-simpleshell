@@ -23,48 +23,48 @@ char **getTokens();
 
 int main(int argc, char const *argv[])
 {
-    const char *prompt = argv[0];
+    const char *prompt = argv[1];
 
-    char input[MAX_INPUT_SIZE];
-    fgets(input, MAX_INPUT_SIZE, stdin);
-
-    char **tokens = NULL;
-    int token_count = 0;
-    size_t length = strlen(input);
-
-    if (input[length - 1] == '\n')
+    while (1)
     {
-        input[length - 1] = '\0';
-    }
+        printf("%s", prompt);
+        char input[MAX_INPUT_SIZE];
+        fgets(input, MAX_INPUT_SIZE, stdin);
 
-    char *token = strtok(input, " ");
-    while (token != NULL)
-    {
+        char **tokens = NULL;
+        int token_count = 0;
+        size_t length = strlen(input);
+
+        if (input[length - 1] == '\n')
+        {
+            input[length - 1] = '\0';
+        }
+
+        char *token = strtok(input, " ");
+        while (token != NULL)
+        {
+            tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
+            tokens[token_count] = token;
+            token_count++;
+            token = strtok(NULL, " ");
+        }
         tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-        tokens[token_count] = token;
-        token_count++;
-        token = strtok(NULL, " ");
-    }
-    tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-    tokens[token_count] = NULL;
+        tokens[token_count] = NULL;
 
-    for (int i = 0; i < token_count; i++)
-    {
-        printf("%d. %s\n", i, tokens[i]);
-    }
-
-    pid_t pid = fork();
-    int code;
-    if (pid == 0)
-    {
-        int code = execvp(tokens[0], tokens);
-        free(tokens);
-        printf("Something went wrong!\n");
-    }
-    else
-    {
-        printf("Done running!");
-        return 1;
+        pid_t pid = fork();
+        int code;
+        if (pid == 0)
+        {
+            int code = execvp(tokens[0], tokens);
+            free(tokens);
+            printf("Something went wrong!\n");
+            return 0;
+        }
+        else
+        {
+            printf("Done running!");
+            return 1;
+        }
     }
     return 0;
 }
