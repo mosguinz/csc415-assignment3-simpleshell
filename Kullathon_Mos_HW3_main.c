@@ -52,6 +52,11 @@ int main(int argc, char const *argv[])
         tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
         tokens[token_count] = NULL;
 
+        if (strcmp(input, "exit") == 0)
+        {
+            exit(0);
+        }
+
         pid_t pid = fork();
         int status;
         if (pid == 0)
