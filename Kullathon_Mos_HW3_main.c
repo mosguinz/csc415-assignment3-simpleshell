@@ -20,8 +20,6 @@
 
 #define MAX_INPUT_SIZE 177
 
-char **getTokens();
-
 int main(int argc, char const *argv[])
 {
     const char *prompt = argc > 1 ? argv[1] : "$ ";
@@ -80,25 +78,4 @@ int main(int argc, char const *argv[])
         }
     }
     return 0;
-}
-
-char **getTokens()
-{
-    char input[MAX_INPUT_SIZE];
-    fgets(input, MAX_INPUT_SIZE, stdin);
-
-    char **tokens = NULL;
-    int token_count = 0;
-
-    char *token = strtok(input, " ");
-    while (token != NULL)
-    {
-        tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-        tokens[token_count] = token;
-        token_count++;
-        token = strtok(NULL, " ");
-    }
-    tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-    tokens[token_count] = NULL;
-    return tokens;
 }
