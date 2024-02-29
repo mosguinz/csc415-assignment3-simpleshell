@@ -53,7 +53,7 @@ int main(int argc, char const *argv[])
         tokens[token_count] = NULL;
 
         pid_t pid = fork();
-        int code;
+        int status;
         if (pid == 0)
         {
             int code = execvp(tokens[0], tokens);
@@ -62,11 +62,11 @@ int main(int argc, char const *argv[])
         }
         else
         {
-            pid_t child_pid = wait(&code);
-            if (WIFEXITED(code))
+            pid_t child_pid = wait(&status);
+            if (WIFEXITED(status))
             {
                 printf("Process %d finished with %d\n", child_pid,
-                       WEXITSTATUS(code));
+                       WEXITSTATUS(status));
             }
         }
     }
