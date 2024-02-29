@@ -30,7 +30,11 @@ int main(int argc, char const *argv[])
     {
         printf("%s", prompt);
         char input[MAX_INPUT_SIZE];
-        fgets(input, MAX_INPUT_SIZE, stdin);
+        if (!fgets(input, MAX_INPUT_SIZE, stdin))
+        {
+            printf("EOF reached, exiting\n");
+            exit(0);
+        }
 
         char **tokens = NULL;
         int token_count = 0;
