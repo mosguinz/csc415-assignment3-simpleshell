@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #define MAX_INPUT_SIZE 177
 
@@ -58,12 +59,15 @@ int main(int argc, char const *argv[])
             int code = execvp(tokens[0], tokens);
             free(tokens);
             printf("Something went wrong!\n");
-            return 0;
         }
         else
         {
-            printf("Done running!");
-            return 1;
+            pid_t child_pid = wait(&code);
+            if (WIFEXITED(code))
+            {
+                printf("Process %d finished with %d\n", child_pid,
+                       WEXITSTATUS(code));
+            }
         }
     }
     return 0;
