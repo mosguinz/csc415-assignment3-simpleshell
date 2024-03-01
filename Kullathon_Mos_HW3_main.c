@@ -34,46 +34,52 @@ int main(int argc, char const *argv[])
             exit(0);
         }
 
-        char **tokens = NULL;
-        int token_count = 0;
-        size_t length = strlen(input);
-
-        if (input[length - 1] == '\n')
+        char *cmd = strtok(input, "|");
+        size_t length = strlen(cmd);
+        if (cmd[length - 1] == '\n')
         {
-            input[length - 1] = '\0';
+            cmd[length - 1] = '\0';
         }
-
-        char *token = strtok(input, " ");
-        while (token != NULL)
-        {
-            tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-            tokens[token_count] = token;
-            token_count++;
-            token = strtok(NULL, " ");
-        }
-        tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-        tokens[token_count] = NULL;
 
         if (strcmp(input, "exit") == 0)
         {
             exit(0);
         }
 
-        pid_t pid = fork();
-        int status;
-        if (pid == 0)
+        while (cmd != NULL)
         {
-            int code = execvp(tokens[0], tokens);
-            free(tokens);
-            printf("Something went wrong!\n");
-        }
-        else
-        {
-            pid_t child_pid = wait(&status);
-            if (WIFEXITED(status))
+            printf("COMMAND : %s\n\n", cmd);
+            char **tokens = NULL;
+            int token_count = 0;
+
+            char *token = strtok(input, " ");
+            while (token != NULL)
             {
-                printf("Process %d finished with %d\n", child_pid,
-                       WEXITSTATUS(status));
+                tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
+                tokens[token_count] = token;
+                token_count++;
+                token = strtok(NULL, " ");
+            }
+            tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
+            tokens[token_count] = NULL;
+
+            cmd = strtok(NULL, "|");
+
+            pid_t pid = fork();
+            int status;
+            if (pid == 0)
+            {
+                int code = execvp(tokens[0], tokens);
+                free(tokens);
+                printf("Something went wrong!\n");
+            }
+            else
+            {
+                pid_t child_pid = wait(&status);
+                if (WIFEXITED(status))
+                {
+                    printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
+                }
             }
         }
     }
