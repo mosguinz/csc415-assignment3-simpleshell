@@ -7,7 +7,8 @@
  *
  * File::  Kullathon_Mos_HW3_main.c
  *
- * Description::  Emulate the functionality of a simple shell.
+ * Description::  Emulate the functionality of a simple shell,
+ *                including pipes.
  *
  **************************************************************/
 
@@ -25,24 +26,28 @@
  * Tokenize provided input into an array of strings,
  * so that it may be provided to `execvp`.
  */
-char **tokenize_command(char *cmd, const char *delim)
+char **tokenize_command(char *cmd)
 {
     int token_count = 0;
 
+    // Remove newline character.
     if (cmd[strlen(cmd) - 1] == '\n')
     {
         cmd[strlen(cmd) - 1] = '\0';
     }
 
+    // Create double pointer to store array of tokens.
     char **tokens = NULL;
-    char *token = strtok(cmd, delim);
+    char *token = strtok(cmd, " ");
     while (token != NULL)
     {
+        // For each token found, reallocate memory and save token.
         tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
         tokens[token_count] = token;
-        (token_count)++;
-        token = strtok(NULL, delim);
+        token_count++;
+        token = strtok(NULL, " ");
     }
+    // Reallocate memory once more to store the null element.
     tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
     tokens[token_count] = NULL;
 
@@ -79,7 +84,7 @@ int main(int argc, char const *argv[])
 
         while (cmd != NULL)
         {
-            char **tokens = tokenize_command(cmd, " ");
+            char **tokens = tokenize_command(cmd);
             cmd = strtok_r(NULL, "|", &inputPtr);
 
             if (cmd == NULL)
@@ -90,8 +95,7 @@ int main(int argc, char const *argv[])
                 if (pid == 0)
                 {
                     int code = execvp(tokens[0], tokens);
-                    free(tokens);
-                    printf("Something went wrong!\n");
+                    exit(errno);
                 }
                 else
                 {
@@ -99,6 +103,10 @@ int main(int argc, char const *argv[])
                     if (WIFEXITED(status))
                     {
                         printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
+                        if (errno = WEXITSTATUS(status))
+                        {
+                            perror("execvp");
+                        }
                     }
                 }
             }
@@ -121,13 +129,15 @@ int main(int argc, char const *argv[])
                 else
                 {
                     pid_t child_pid = wait(&status);
-                    char **tokens = tokenize_command(cmd, " ");
+                    char **tokens = tokenize_command(cmd);
 
                     if (WIFEXITED(status))
                     {
                         printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
-                        errno = WEXITSTATUS(status);
-                        perror("execvp");
+                        if (errno = WEXITSTATUS(status))
+                        {
+                            perror("execvp");
+                        }
                     }
 
                     pid_t pid = fork();
@@ -148,8 +158,10 @@ int main(int argc, char const *argv[])
                         if (WIFEXITED(status))
                         {
                             printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
-                            errno = WEXITSTATUS(status);
-                            perror("execvp");
+                            if (errno = WEXITSTATUS(status))
+                            {
+                                perror("execvp");
+                            }
                         }
                     }
                 }
