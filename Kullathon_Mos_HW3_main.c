@@ -51,7 +51,8 @@ char **tokenize_command(char *cmd)
 
 int main(int argc, char const *argv[])
 {
-    const char *prompt = argc > 1 ? argv[1] : "$ ";
+    // Per requirement, display custom prompt, if provided.
+    const char *prompt = argc > 1 ? argv[1] : "> ";
 
     while (1)
     {
