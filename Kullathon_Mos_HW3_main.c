@@ -135,42 +135,52 @@ int main(int argc, char const *argv[])
             }
             else
             {
-                // single pipe
+                // Create a child process and a pipe with two file descriptors.
                 int fd[2];
                 pipe(fd);
-
                 pid_t pid = fork();
                 int status;
+
                 if (pid == 0)
                 {
+                    // In the child process, duplicate the write end of the pipe
+                    // to the stdout and close unused pipes.
                     dup2(fd[1], STDOUT_FILENO);
                     close(fd[0]);
                     close(fd[1]);
+                    // Then, execute the command.
                     execvp(tokens[0], tokens);
                     exit(errno);
                 }
                 else
                 {
+                    // In the parent, wait for the process to execute.
                     pid_t child_pid = wait(&status);
-                    char **tokens = tokenize_command(cmd);
 
                     if (WIFEXITED(status))
                     {
                         print_pid(child_pid, status);
                     }
 
+                    // Again, tokenize the command to execute the command.
+                    char **tokens = tokenize_command(cmd);
                     pid_t pid = fork();
                     int status;
                     if (pid == 0)
                     {
+                        // In the child process, duplicate the write end to
+                        // std in and close unused pipes.
                         dup2(fd[0], STDIN_FILENO);
                         close(fd[0]);
                         close(fd[1]);
+                        // Then, execute.
                         execvp(tokens[0], tokens);
                         exit(errno);
                     }
                     else
                     {
+                        // In the parent, close the remaining two pipes and
+                        // wait for the process to finish executing.
                         close(fd[0]);
                         close(fd[1]);
                         pid_t child_pid = wait(&status);
@@ -181,6 +191,7 @@ int main(int argc, char const *argv[])
                     }
                 }
             }
+            // Get the next command to run, if any.
             cmd = strtok_r(NULL, "|", &input_ptr);
         }
     }
