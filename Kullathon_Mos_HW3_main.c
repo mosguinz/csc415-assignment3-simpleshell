@@ -7,7 +7,7 @@
  *
  * File::  Kullathon_Mos_HW3_main.c
  *
- * Description::  bruh
+ * Description::  Emulate the functionality of a simple shell.
  *
  **************************************************************/
 
@@ -50,7 +50,6 @@ int main(int argc, char const *argv[])
 
         while (cmd != NULL)
         {
-            printf("COMMAND : %s\n\n", cmd);
             char **tokens = NULL;
             int token_count = 0;
 
@@ -65,12 +64,10 @@ int main(int argc, char const *argv[])
             tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
             tokens[token_count] = NULL;
             cmd = strtok_r(NULL, "|", &inputPtr);
-            printf("command: %s\n", cmd);
 
             if (cmd == NULL)
             {
                 // no pipes
-                printf("not null WTTF????: %s\n", cmd);
                 pid_t pid = fork();
                 int status;
                 if (pid == 0)
@@ -90,7 +87,6 @@ int main(int argc, char const *argv[])
             }
             else
             {
-                printf("ELSE!!!!!!\n");
                 // single pipe
                 int fd[2];
                 pipe(fd);
@@ -103,7 +99,6 @@ int main(int argc, char const *argv[])
                     close(fd[0]);
                     close(fd[1]);
                     execvp(tokens[0], tokens);
-                    // printf("Something went wrong!\n");
                     exit(errno);
                 }
                 else
@@ -141,7 +136,6 @@ int main(int argc, char const *argv[])
                         close(fd[0]);
                         close(fd[1]);
                         execvp(tokens[0], tokens);
-                        // printf("Something went wrong!\n");
                         exit(errno);
                     }
                     else
