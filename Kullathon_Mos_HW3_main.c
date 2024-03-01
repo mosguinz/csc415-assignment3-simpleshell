@@ -54,6 +54,18 @@ char **tokenize_command(char *cmd)
     return tokens;
 }
 
+/**
+ * Helper to print process ID and display error message from `execvp`.
+ */
+void print_pid(pid_t pid, int status)
+{
+    printf("Process %d finished with %d\n", pid, WEXITSTATUS(status));
+    if (errno = WEXITSTATUS(status))
+    {
+        perror("execvp");
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     // Per requirement, display custom prompt, if provided.
@@ -61,52 +73,63 @@ int main(int argc, char const *argv[])
 
     while (1)
     {
+        // Display prompt.
         printf("%s", prompt);
         char input[MAX_INPUT_SIZE];
+
+        // Check for EOF. Exit shell if reached.
         if (!fgets(input, MAX_INPUT_SIZE, stdin))
         {
             printf("EOF reached, exiting\n");
             exit(0);
         }
-        char *inputPtr = NULL;
-        char *cmd = strtok_r(input, "|", &inputPtr);
+
+        // Split the provided input on pipes.
+        char *input_ptr = NULL;
+        char *cmd = strtok_r(input, "|", &input_ptr);
         size_t length = strlen(cmd);
+
+        // Once again, remove the newline character at the end.
         if (cmd[length - 1] == '\n')
         {
             cmd[length - 1] = '\0';
         }
 
+        // Exit shell, when prompted.
         if (strcmp(input, "exit") == 0)
         {
             printf("Exiting...\n");
             exit(0);
         }
 
+        // For each command found - i.e., for the number of pipes found.
         while (cmd != NULL)
         {
+            // Tokenize the command, to be passed to `execvp`.
             char **tokens = tokenize_command(cmd);
-            cmd = strtok_r(NULL, "|", &inputPtr);
 
+            // Read in the next command to run.
+            cmd = strtok_r(NULL, "|", &input_ptr);
+
+            // If there is only one command to run, then no piping needed.
             if (cmd == NULL)
             {
-                // no pipes
+                // Create a child process.
                 pid_t pid = fork();
                 int status;
                 if (pid == 0)
                 {
+                    // In the child process, execute command and return.
                     int code = execvp(tokens[0], tokens);
                     exit(errno);
                 }
                 else
                 {
+                    // In the parent, wait the process to execute and print PID.
                     pid_t child_pid = wait(&status);
                     if (WIFEXITED(status))
                     {
-                        printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
-                        if (errno = WEXITSTATUS(status))
-                        {
-                            perror("execvp");
-                        }
+                        print_pid(child_pid, status);
                     }
                 }
             }
@@ -133,11 +156,7 @@ int main(int argc, char const *argv[])
 
                     if (WIFEXITED(status))
                     {
-                        printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
-                        if (errno = WEXITSTATUS(status))
-                        {
-                            perror("execvp");
-                        }
+                        print_pid(child_pid, status);
                     }
 
                     pid_t pid = fork();
@@ -157,16 +176,12 @@ int main(int argc, char const *argv[])
                         pid_t child_pid = wait(&status);
                         if (WIFEXITED(status))
                         {
-                            printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
-                            if (errno = WEXITSTATUS(status))
-                            {
-                                perror("execvp");
-                            }
+                            print_pid(child_pid, status);
                         }
                     }
                 }
             }
-            cmd = strtok_r(NULL, "|", &inputPtr);
+            cmd = strtok_r(NULL, "|", &input_ptr);
         }
     }
     return 0;
