@@ -25,7 +25,7 @@
  * Tokenize provided input into an array of strings,
  * so that it may be provided to `execvp`.
  */
-char **tokenize_command(char *cmd)
+char **tokenize_command(char *cmd, const char *delim)
 {
     int token_count = 0;
 
@@ -35,13 +35,13 @@ char **tokenize_command(char *cmd)
     }
 
     char **tokens = NULL;
-    char *token = strtok(cmd, " ");
+    char *token = strtok(cmd, delim);
     while (token != NULL)
     {
         tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
         tokens[token_count] = token;
         (token_count)++;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, delim);
     }
     tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
     tokens[token_count] = NULL;
@@ -79,7 +79,7 @@ int main(int argc, char const *argv[])
 
         while (cmd != NULL)
         {
-            char **tokens = tokenize_command(cmd);
+            char **tokens = tokenize_command(cmd, " ");
             cmd = strtok_r(NULL, "|", &inputPtr);
 
             if (cmd == NULL)
@@ -121,7 +121,7 @@ int main(int argc, char const *argv[])
                 else
                 {
                     pid_t child_pid = wait(&status);
-                    char **tokens = tokenize_command(cmd);
+                    char **tokens = tokenize_command(cmd, " ");
 
                     if (WIFEXITED(status))
                     {
