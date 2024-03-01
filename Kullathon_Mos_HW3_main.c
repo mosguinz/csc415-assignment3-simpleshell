@@ -101,6 +101,11 @@ int main(int argc, char const *argv[])
             printf("Exiting...\n");
             exit(0);
         }
+        if (strlen(input) == 0)
+        {
+            printf("Please pass in an argument\n");
+            continue;
+        }
 
         // For each command found - i.e., for the number of pipes found.
         while (cmd != NULL)
@@ -120,7 +125,8 @@ int main(int argc, char const *argv[])
                 if (pid == 0)
                 {
                     // In the child process, execute command and return.
-                    int code = execvp(tokens[0], tokens);
+                    execvp(tokens[0], tokens);
+                    free(tokens);
                     exit(errno);
                 }
                 else
@@ -150,6 +156,7 @@ int main(int argc, char const *argv[])
                     close(fd[1]);
                     // Then, execute the command.
                     execvp(tokens[0], tokens);
+                    free(tokens);
                     exit(errno);
                 }
                 else
@@ -161,7 +168,7 @@ int main(int argc, char const *argv[])
                     {
                         print_pid(child_pid, status);
                     }
-
+                    free(tokens);
                     // Again, tokenize the command to execute the command.
                     char **tokens = tokenize_command(cmd);
                     pid_t pid = fork();
@@ -175,6 +182,7 @@ int main(int argc, char const *argv[])
                         close(fd[1]);
                         // Then, execute.
                         execvp(tokens[0], tokens);
+                        free(tokens);
                         exit(errno);
                     }
                     else
@@ -188,6 +196,7 @@ int main(int argc, char const *argv[])
                         {
                             print_pid(child_pid, status);
                         }
+                        free(tokens);
                     }
                 }
             }
