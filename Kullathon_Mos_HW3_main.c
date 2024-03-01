@@ -162,6 +162,7 @@ int main(int argc, char const *argv[])
                 else
                 {
                     // In the parent, wait for the process to execute.
+                    close(fd[1]);
                     pid_t child_pid = wait(&status);
 
                     if (WIFEXITED(status))
@@ -177,10 +178,9 @@ int main(int argc, char const *argv[])
                     {
                         // In the child process, duplicate the write end to
                         // std in and close unused pipes.
+                        close(STDIN_FILENO);
                         dup2(fd[0], STDIN_FILENO);
                         close(fd[0]);
-                        close(fd[1]);
-                        // Then, execute.
                         execvp(tokens[0], tokens);
                         free(tokens);
                         exit(errno);
@@ -190,7 +190,6 @@ int main(int argc, char const *argv[])
                         // In the parent, close the remaining two pipes and
                         // wait for the process to finish executing.
                         close(fd[0]);
-                        close(fd[1]);
                         pid_t child_pid = wait(&status);
                         if (WIFEXITED(status))
                         {
@@ -201,7 +200,10 @@ int main(int argc, char const *argv[])
                 }
             }
             // Get the next command to run, if any.
-            cmd = strtok_r(NULL, "|", &input_ptr);
+            while (cmd != NULL)
+            {
+                cmd = strtok_r(NULL, "|", &input_ptr);
+            }
         }
     }
     return 0;
