@@ -43,6 +43,7 @@ int main(int argc, char const *argv[])
 
         if (strcmp(input, "exit") == 0)
         {
+            printf("Exiting...\n");
             exit(0);
         }
 
