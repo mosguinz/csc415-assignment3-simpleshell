@@ -21,6 +21,34 @@
 
 #define MAX_INPUT_SIZE 177
 
+/**
+ * Tokenize provided input into an array of strings,
+ * so that it may be provided to `execvp`.
+ */
+char **tokenize_command(char *cmd)
+{
+    int token_count = 0;
+
+    if (cmd[strlen(cmd) - 1] == '\n')
+    {
+        cmd[strlen(cmd) - 1] = '\0';
+    }
+
+    char **tokens = NULL;
+    char *token = strtok(cmd, " ");
+    while (token != NULL)
+    {
+        tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
+        tokens[token_count] = token;
+        (token_count)++;
+        token = strtok(NULL, " ");
+    }
+    tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
+    tokens[token_count] = NULL;
+
+    return tokens;
+}
+
 int main(int argc, char const *argv[])
 {
     const char *prompt = argc > 1 ? argv[1] : "$ ";
@@ -50,19 +78,7 @@ int main(int argc, char const *argv[])
 
         while (cmd != NULL)
         {
-            char **tokens = NULL;
-            int token_count = 0;
-
-            char *token = strtok(cmd, " ");
-            while (token != NULL)
-            {
-                tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-                tokens[token_count] = token;
-                token_count++;
-                token = strtok(NULL, " ");
-            }
-            tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-            tokens[token_count] = NULL;
+            char **tokens = tokenize_command(cmd);
             cmd = strtok_r(NULL, "|", &inputPtr);
 
             if (cmd == NULL)
@@ -104,23 +120,8 @@ int main(int argc, char const *argv[])
                 else
                 {
                     pid_t child_pid = wait(&status);
-                    // TOKENIZE COMMAND
-                    char **tokens = NULL;
-                    int token_count = 0;
-                    if (cmd[strlen(cmd) - 1] == '\n')
-                    {
-                        cmd[strlen(cmd) - 1] = '\0';
-                    }
-                    char *token = strtok(cmd, " ");
-                    while (token != NULL)
-                    {
-                        tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-                        tokens[token_count] = token;
-                        token_count++;
-                        token = strtok(NULL, " ");
-                    }
-                    tokens = realloc(tokens, (token_count + 1) * sizeof(char *));
-                    tokens[token_count] = NULL;
+                    char **tokens = tokenize_command(cmd);
+
                     if (WIFEXITED(status))
                     {
                         printf("Process %d finished with %d\n", child_pid, WEXITSTATUS(status));
